@@ -1,8 +1,20 @@
 SMA Torrent
 -----------
 
-A java BitTorrent client using the [JADE Multi-Agent Systems Framework](http://jade.tilab.com).
+A java BitTorrent client using the [JADE Multi-Agent Systems (MAS) Framework](http://jade.tilab.com).
+It uses the infrastructure provided by the JADE framework as a tracker system that informs the clients the location of files they want to download using the BitTorrent protocol.
+
+Each client is a Java Swing Application that uses the resources provided by the JADE framework to share files between running clients. The JADE server provides all the features to find and exchange pieces of file among the clients.
+The BitTorrent protocol was implemented following the [specifications here](https://wiki.theory.org/BitTorrentSpecification).
+
 For more information, refer to [this paper](paper-sma-torrent.pdf) (only in Portuguese).
+
+Disclaimer 
+----------
+The project can be useful just as a concept proof of Multi-Agent Systems (MAS), once the architecture of MAS using the JADE framework imposes a centralized server to allow the communication between the clients (agents/peers). 
+
+Several BitTorrent systems have evolved to a decentralized management architecture that provides more independency, security, scalability and fault-tolerance. By this way, the current project doesn't intend to be a viable BitTorrent client, but only a case study of MAS and JADE framework use.
+
 
 
 How to compile and run the project
