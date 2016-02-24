@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 client-name" >&2
-  exit 1
+  echo "Usage: $0 agent-alias" >&2
+  exit -1
 fi
 
 BASE=clients

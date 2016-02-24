@@ -18,7 +18,7 @@ Execute the following commands in a terminal of a Unix-based operating system, s
 1. Open a terminal in the project's root folder
 1. Compile the project: `mvn package` to generate the project jar file.
 1. Start the JADE server: `./0-start-server.sh` and wait until the JADE GUI is shown.
-1. You can use the command `./1-create-clients.sh` to create several clients/agents at the folder `clients`. The number of clients to be create can be changed editing the script. The JADE framework requires that each client/agent has a alias. This scripts gives numbered alias for the created clients, such as cli1, cli2, etc.
+1. You can use the command `./1-create-clients.sh number-of-clients-to-create` to create several clients/agents at the folder `clients`. For instance, executing `./1-create-clients.sh 2` will create two clients named `cli1` and `cli2` at the `clients` folder. As the JADE framework requires that each client/agent has a alias, the scripts consider that when creating and executing a client. 
 1. To run each created client/agent you have to execute the command `./2-exec-client.sh agent-alias` for each client/agent you want to run. For instance, executing `./2-exec-client.sh cli1` will run the agent named `cli1` that has to be created previously at the folder `clients/cli1`.
 
 
