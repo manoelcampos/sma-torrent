@@ -15,7 +15,7 @@ The project can be useful just as a concept proof of Multi-Agent Systems (MAS), 
 
 Several BitTorrent systems have evolved to a decentralized management architecture that provides more independency, security, scalability and fault-tolerance. By this way, the current project doesn't intend to be a viable BitTorrent client, but only a case study of MAS and JADE framework use.
 
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. For more information, see the [license file](LICENSE)
 
 How to compile and run the project
 -----------------------------------
