@@ -13,7 +13,7 @@ Disclaimer
 ----------
 The project can be useful just as a concept proof of Multi-Agent Systems (MAS), once the architecture of MAS using the JADE framework imposes a centralized server to allow the communication between the clients (agents/peers). 
 
-Several BitTorrent systems have evolved to a decentralized management architecture that provides more independency, security, scalability and fault-tolerance. By this way, the current project doesn't intend to be a viable BitTorrent client, but only a case study of MAS and JADE framework use.
+Several BitTorrent systems have evolved to a decentralized management architecture that provides more independency, security, scalability and fault-tolerance. This way, the current project doesn't intend to be a viable BitTorrent client, but only a case study of MAS and JADE framework use.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. For more information, see the [license file](LICENSE).
 
@@ -36,12 +36,3 @@ Execute the following commands in a terminal of a Unix-based operating system, s
 
 To start seeding a file, you have to place the file and its respective torrent in the same directory and add it to a client/agent GUI.
 
-
-KNOWN BUGS
------------
-
-- When adding or removing a torrent from a client, the torrent table in the GUI may not update automatically. If such a problem happens, you can resize the window in order to allow the table update. When the client is receiving files, the table is only updated when you enter and exit a given column.
-
-- When closing the application, some torrents may not be unregistered from the JADE Directory Facilitator (DF) Service, what causes error when trying to reopen the same client GUI. In this case, you can restart the JADE server or manually unregister the corresponding torrent in the server GUI.
-
-- To remove or pause a torrent while a agent behaviour is accessing it can cause the application to hang unexpectedly.
