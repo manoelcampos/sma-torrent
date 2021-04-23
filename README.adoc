@@ -1,6 +1,6 @@
 :numbered:
 
-== SMA Torrent
+== SMA Torrent image:https://github.com/manoelcampos/sma-torrent/actions/workflows/maven.yml/badge.svg[link=https://github.com/manoelcampos/sma-torrent/actions/workflows/maven.yml]
 
 A Java 8 BitTorrent client using the http://jade.tilab.com[JADE Multi-Agent Systems (MAS) Framework].
 It uses the infrastructure provided by the JADE framework as a tracker system that informs the clients the location of files they want to download using the BitTorrent protocol.
