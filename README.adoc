@@ -10,6 +10,8 @@ The BitTorrent protocol was implemented following the https://wiki.theory.org/Bi
 
 For more information, refer to link:paper-sma-torrent.pdf[this paper] (only in Portuguese).
 
+Check some sample torrents inside the link:src/main/java[src/main/java] dir.
+
 .JADE Server
 image:imgs/jade-server.png[]
 
