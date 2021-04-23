@@ -18,7 +18,11 @@
        <name>repo</name> 
        <url>${project.baseUri}/repo</url>
      </repository>
-    </repositories>    
+    </repositories>
+
+    <build>
+        <finalName>${project.name}</finalName>
+    </build>
     
     <dependencies>
         <dependency>
