@@ -5,7 +5,7 @@ if [ "$#" -ne 1 ]; then
   exit -1
 fi
 
-BASE=clients
+BASE=target/clients
 CLI=$1
 DIR=$BASE/$CLI
 mkdir -p $DIR

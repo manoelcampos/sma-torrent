@@ -5,8 +5,8 @@ if [ "$#" -ne 1 ]; then
   exit -1
 fi
 
-BASE=clients
-echo "Create a directory in $BASE for each client/agent"
+BASE=target/clients
+echo "Creating a directory in $BASE for each client/agent"
 
 NUMBER_OF_CLIENTS=$1
 for i in `seq 1 $NUMBER_OF_CLIENTS`

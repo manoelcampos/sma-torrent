@@ -4,7 +4,7 @@ clear
 echo "Exec a agent from a specific folder"
 echo "Input the agent folder name as a parameter to this script"
 
-BASE=clients
+BASE=target/clients
 CLI=$1
 DIR=$BASE/$CLI
 
