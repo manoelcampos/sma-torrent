@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 agent-alias" >&2
-  exit -1
+  exit 0
 fi
 
 BASE=target/clients
