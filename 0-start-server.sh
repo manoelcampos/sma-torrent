@@ -2,13 +2,13 @@
 
 clear
 
-BASE=clients
+JAR=repo/com/tilab/jade/4.4.0/jade-4.4.0.jar
 
 echo "Starting the JADE server."
-java -cp $BASE/jade.jar jade.Boot -gui & 
+java -cp $JAR jade.Boot -gui &
 
 if [ $? -ne 0 ]; then
-	  echo "It was not possible to run the jade server. Check your $BASE dir for the jade.jar file." 
+	  echo "It was not possible to run the jade server. Check if the $JAR file exists."
   exit $?
 fi
 
