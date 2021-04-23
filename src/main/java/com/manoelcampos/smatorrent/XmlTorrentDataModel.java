@@ -171,7 +171,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         Node node = atribs.getNamedItem(colNames[c]);
         if (node != null)
             return node.getNodeValue();
-        else return "";
+        return "";
     }
 
     /**
@@ -216,7 +216,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         Object val = getValueAt(r, downloadedCol);
         if (val != null)
             return Integer.parseInt(val.toString());
-        else return 0;
+        return 0;
     }
 
     public int getUploaded(int r) {

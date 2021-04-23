@@ -30,7 +30,7 @@
             <artifactId>jade</artifactId>
             <version>4.4.0</version>
         </dependency>
-    </dependencies>   
+    </dependencies>
     
     <description>A Java bittorrent client using Multi-Agent Systems JADE Framework</description>
 </project>
