@@ -15,4 +15,4 @@ cp src/main/java/*.torrent $DIR
 cp src/main/java/*.xml $DIR
 
 
-echo "Agent/Client '$CLI' created at '$DIR'. To run the Agent/Client execute: ./2-exec-client.sh $CLI"
+echo "Agent/Client '$CLI' created at $DIR. To run the Agent/Client execute: ./2-exec-client.sh $CLI"
