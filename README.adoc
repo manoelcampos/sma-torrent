@@ -2,7 +2,7 @@
 
 == SMA Torrent
 
-A java BitTorrent client using the http://jade.tilab.com[JADE Multi-Agent Systems (MAS) Framework].
+A Java 8 BitTorrent client using the http://jade.tilab.com[JADE Multi-Agent Systems (MAS) Framework].
 It uses the infrastructure provided by the JADE framework as a tracker system that informs the clients the location of files they want to download using the BitTorrent protocol.
 
 Each client is a Java Swing Application that uses the resources provided by the JADE framework to share files between running clients. The JADE server provides all the features to find and exchange pieces of file among the clients.
