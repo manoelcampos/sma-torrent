@@ -2,7 +2,7 @@
 
 clear
 
-JAR=repo/com/tilab/jade/4.4.0/jade-4.4.0.jar
+JAR="repo/com/tilab/jade/4.4.0/jade-4.4.0.jar"
 
 echo "Starting the JADE server."
 java -cp $JAR jade.Boot -gui &

@@ -5,14 +5,13 @@ if [ "$#" -ne 1 ]; then
   exit 0
 fi
 
-BASE=target/clients
+JAR="repo/com/tilab/jade/4.4.0/jade-4.4.0.jar"
+BASE=target
 CLI=$1
-DIR=$BASE/$CLI
+DIR=$BASE/clients/$CLI
 mkdir -p $DIR
-cp repo/com/tilab/jade/4.4.0/jade-4.4.0.jar $BASE/jade.jar
-cp target/SMATorrent-0.8.jar $DIR/SMATorrent.jar
+cp $JAR $BASE/jade.jar
 cp src/main/java/*.torrent $DIR
 cp src/main/java/*.xml $DIR
-
 
 echo "Agent/Client '$CLI' created at $DIR. To run the Agent/Client execute: ./2-exec-client.sh $CLI"
