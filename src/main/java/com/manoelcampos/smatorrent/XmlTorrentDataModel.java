@@ -100,7 +100,8 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     public void addRow(String description, String fileName,
                        Long fileSize, String status, Integer completed, Long uploaded,
                        Long downloaded, String infoHash,
-                       Integer pieceLength, String bitField) {
+                       Integer pieceLength, String bitField)
+    {
         Element parent = doc.getDocumentElement();
         Element el = doc.createElement(ROOT_ELEMENT_TAG);
         el.setAttribute(colNames[descriptionCol], description);
@@ -187,6 +188,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
             if (infoHash.compareToIgnoreCase(getInfoHash(r)) == 0)
                 return r;
         }
+
         return -1;
     }
 
@@ -221,7 +223,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         Object val = getValueAt(r, uploadedCol);
         if (val != null)
             return Integer.parseInt(val.toString());
-        else return 0;
+        return 0;
     }
 
     /**
@@ -238,7 +240,9 @@ public class XmlTorrentDataModel extends AbstractTableModel {
             } catch (NumberFormatException e) {
                 throw new NumberFormatException(e.getMessage() + " at row " + r);
             }
-        } else return 0;
+        }
+
+        return 0;
     }
 
     /**
@@ -251,7 +255,8 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         Object val = getValueAt(r, incompleteCol);
         if (val != null)
             return Integer.parseInt(val.toString());
-        else return 0;
+
+        return 0;
     }
 
     /**
@@ -268,49 +273,56 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         Object val = getValueAt(r, fileSizeCol);
         if (val != null)
             return Integer.parseInt(val.toString());
-        else return 0;
+
+        return 0;
     }
 
     public double getElapsedMinutos(int r) {
         Object val = getValueAt(r, elapsedMinutesCol);
         if (val != null)
             return Double.parseDouble(val.toString());
-        else return 0.0;
+
+        return 0.0;
     }
 
     public int getPieceLength(int r) {
         Object val = getValueAt(r, pieceLengthCol);
         if (val != null)
             return Integer.parseInt(val.toString());
-        else return 0;
+
+        return 0;
     }
 
     public String getDescription(int r) {
         Object val = getValueAt(r, descriptionCol);
         if (val != null)
             return val.toString();
-        else return "";
+
+        return "";
     }
 
     public String getInfoHash(int r) {
         Object val = getValueAt(r, infoHashCol);
         if (val != null)
             return val.toString();
-        else return "";
+
+        return "";
     }
 
     public String getStatus(int r) {
         Object val = getValueAt(r, statusCol);
         if (val != null)
             return val.toString();
-        else return "";
+
+        return "";
     }
 
     public String getBitField(int r) {
         Object val = getValueAt(r, bitFieldCol);
         if (val != null)
             return val.toString();
-        else return "";
+
+        return "";
     }
 
     /**
