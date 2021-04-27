@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that implements a TableModel used with
@@ -53,7 +54,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
 
     public static final int
             descriptionCol = 0, fileNameCol = 1, fileSizeCol = 2, statusCol = 3,
-            percentcompletedCol = 4, uploadedCol = 5, downloadedCol = 6, infoHashCol = 7,
+            percentCompletedCol = 4, uploadedCol = 5, downloadedCol = 6, infoHashCol = 7,
             pieceLengthCol = 8, bitFieldCol = 9, completeCol = 10, incompleteCol = 11,
             elapsedMinutesCol = 12;
 
@@ -65,7 +66,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     protected Document doc;
 
     //used to hold a list of TableModelListeners
-    protected java.util.List<Object> tableModelListeners = new ArrayList<>();
+    protected List<Object> tableModelListeners = new ArrayList<>();
 
     /**
      * Constructor - create a DOM
@@ -100,15 +101,14 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     public void addRow(String description, String fileName,
                        Long fileSize, String status, Integer completed, Long uploaded,
                        Long downloaded, String infoHash,
-                       Integer pieceLength, String bitField)
-    {
+                       Integer pieceLength, String bitField) {
         Element parent = doc.getDocumentElement();
         Element el = doc.createElement(ROOT_ELEMENT_TAG);
         el.setAttribute(colNames[descriptionCol], description);
         el.setAttribute(colNames[fileNameCol], fileName);
         el.setAttribute(colNames[fileSizeCol], fileSize.toString());
         el.setAttribute(colNames[statusCol], status);
-        el.setAttribute(colNames[percentcompletedCol], completed.toString());
+        el.setAttribute(colNames[percentCompletedCol], completed.toString());
         el.setAttribute(colNames[uploadedCol], uploaded.toString());
         el.setAttribute(colNames[downloadedCol], downloaded.toString());
         el.setAttribute(colNames[infoHashCol], infoHash);
@@ -155,8 +155,8 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     /**
      * Return an XML data given its location
      *
-     * @param     r   the row whose value is to be looked up
-     * @param     c    the column whose value is to be looked up
+     * @param r the row whose value is to be looked up
+     * @param c the column whose value is to be looked up
      * @return the value Object at the specified cell
      */
     @Override
@@ -328,8 +328,8 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     /**
      * Return the name of column for the table.
      *
+     * @param c the index of column
      * @return the name of the column
-     * @param     c   the index of column
      */
     @Override
     public String getColumnName(int c) {
@@ -351,8 +351,8 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     /**
      * Return false - table is not editable
      *
-     * @param     r    the row whose value is to be looked up
-     * @param     c    the column whose value is to be looked up
+     * @param r the row whose value is to be looked up
+     * @param c the column whose value is to be looked up
      * @return true if the cell is editable.
      */
     @Override
@@ -363,9 +363,9 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     /**
      * This method is not implemented, because the table is not editable.
      *
-     * @param     value         the new value
-     * @param     r     the row whose value is to be changed
-     * @param     c     the column whose value is to be changed
+     * @param value the new value
+     * @param r     the row whose value is to be changed
+     * @param c     the column whose value is to be changed
      */
     @Override
     public void setValueAt(Object value, int r, int c) {
@@ -421,7 +421,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * Add a listener to the list that's notified each time a change
      * to the data model occurs.
      *
-     * @param    l the TableModelListener
+     * @param l the TableModelListener
      */
     @Override
     public void addTableModelListener(TableModelListener l) {
@@ -434,7 +434,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * Remove a listener from the list that's notified each time a
      * change to the data model occurs.
      *
-     * @param    l the TableModelListener
+     * @param l the TableModelListener
      */
     @Override
     public void removeTableModelListener(TableModelListener l) {
