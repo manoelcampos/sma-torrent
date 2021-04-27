@@ -77,7 +77,7 @@ public class FindPeersBehaviour extends TickerBehaviour {
 		/*If the download is not complete and the number of peers
 		 * obtained is less than the number of peers wanted,
 		 * search for more peers.*/
-		if(dm.getPeersCount(row) < numWant) {
+		if(dm.getRow(row).getPeersCount() < numWant) {
 			System.out.println(myAgent.getLocalName() + 
 				": Finding peers for the torrent       " + infoHash);
 			DFAgentDescription template = new DFAgentDescription();
@@ -104,8 +104,8 @@ public class FindPeersBehaviour extends TickerBehaviour {
 					 rpb = new RequestPiecesBehaviour(
 							 	this,
 								myAgent, peers, 
-								infoHash, dm.getBitField(row),
-								dm.getPieceLength(row), dm);
+								infoHash, dm.getRow(row).getBitField(),
+								dm.getRow(row).getPieceLength(), dm);
 				     myAgent.addBehaviour(rpb);
 				   }
 				   else rpb.addNewPeers(peers);

@@ -72,7 +72,7 @@ public class MainForm extends JFrame {
 		ListSelectionModel rowSM = (ListSelectionModel)e.getSource();
 		int selectedIndex = rowSM.getMinSelectionIndex();	
 		if(selectedIndex >= 0) {
-			if(dataModel.getStatus(selectedIndex).compareToIgnoreCase(Torrent.STARTED)==0)
+			if(dataModel.getRow(selectedIndex).sameStatus(Torrent.STARTED))
 				btnStartPause.setText(PAUSE);
 			else btnStartPause.setText(PLAY);
 			setMissingPiecesCountStatus();
@@ -98,15 +98,9 @@ public class MainForm extends JFrame {
 					tableSelectionChanged(e);
 				}
 			});
-		} catch (ParserConfigurationException e) {
+		} catch (ParserConfigurationException | IOException e) {
 			JOptionPane.showMessageDialog(
 			    this, e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		} catch (SAXException e) {
-			JOptionPane.showMessageDialog(
-				this, e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(
-				this, e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	
@@ -215,7 +209,7 @@ public class MainForm extends JFrame {
 		}
 		
 		try {
-		  String infoHash = dataModel.getInfoHash(row);
+		  String infoHash = dataModel.getRow(row).getInfoHash();
 		  dataModel.removeRow(row);
 		  dataModel.saveXml();
 		  
@@ -240,17 +234,13 @@ public class MainForm extends JFrame {
 
 		try {
 			if(btnStartPause.getText().compareToIgnoreCase(PAUSE)==0) {
-				dataModel.setValueAt(Torrent.STOPPED, row, XmlTorrentDataModel.statusCol);
-				myAgent.deregisterTorrent(dataModel.getInfoHash(row));
+				dataModel.setValueAt(Torrent.STOPPED, row, 3);
+				myAgent.deregisterTorrent(dataModel.getRow(row).getInfoHash());
 				btnStartPause.setText(PLAY);
 			}
 			else  {
-				dataModel.setValueAt(Torrent.STARTED, row, XmlTorrentDataModel.statusCol);
-				myAgent.registerTorrent(
-					dataModel.getInfoHash(row),
-					dataModel.getBitField(row),
-					dataModel.getDownloaded(row), 
-					dataModel.getUploaded(row));
+				dataModel.setValueAt(Torrent.STARTED, row, 3);
+				myAgent.registerTorrent(dataModel.getRow(row));
 				btnStartPause.setText(PAUSE);
 			}
 		} catch (FIPAException e) {
@@ -268,14 +258,12 @@ public class MainForm extends JFrame {
 		mnuAbout = new JMenuItem("About...");
 		mnuAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String msg = "iTorrent - The intelligent Torrent Client\n" +
-				"Manoel Campos da Silva Filho\n" +
-				"http://manoelcampos.com/itorrent\n" +
-				"manoelcampos@gmail.com\n" +
-				"Powered by Java & JADE";
+				String msg = """
+						SMA Torrent - The multi-agent Torrent Client
+						Manoel Campos da Silva Filho
+						Powered by JADE""";
 				JOptionPane.showMessageDialog(mnuAbout, msg);
 			}
-			
 		});
 		
 		mnuHelp.add(mnuAbout);
@@ -321,12 +309,10 @@ public class MainForm extends JFrame {
 			    		t.getInfo().getPieceLength());
 			    String bitField = Torrent.generateBitField(numPieces, addToSeed);
 			    long downloaded = addToSeed ? t.getInfo().getLength() : 0;
-			    long uploaded = 0;
-			    myAgent.registerTorrent(infoHash, bitField, 0, 0);
+			    myAgent.registerTorrent(infoHash, bitField);
 			    dataModel.addRow(
-				  t.getInfo().getName(), torrentFileName, 
-				  t.getInfo().getLength(), Torrent.STARTED, 0, uploaded, downloaded, 
-				  infoHash, t.getInfo().getPieceLength(), bitField);
+				  t.getInfo(), torrentFileName, Torrent.STARTED, downloaded,
+				  infoHash, bitField);
 			    myAgent.registerFindPeersBehaviour(dataModel.getRowCount()-1);
 			    dataModel.saveXml();
 		    } catch(NoSuchAlgorithmException e) {

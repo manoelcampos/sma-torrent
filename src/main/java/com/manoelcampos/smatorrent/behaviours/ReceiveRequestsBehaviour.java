@@ -45,7 +45,7 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 		reply.setReplyWith(handshake[3]);
 		if(row > -1) {
 			//bitfield msg: <len=0001+X><id=5><bitfield> 
-			String bitFieldMsg =  dm.getBitField(row);
+			String bitFieldMsg =  dm.getRow(row).getBitField();
 			bitFieldMsg = 
 				"<len=0001"+bitFieldMsg.length()+"><id=5>"+
 				"<" + bitFieldMsg + ">";
@@ -106,7 +106,7 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 			try {
 				String path = new File(".").getCanonicalPath();
 				path += File.separator + "bin" + File.separator;
-				String fileName = path+dm.getDescription(row);
+				String fileName = path+dm.getRow(row).getDescription();
 				File file = new File(fileName);
 				if(!file.exists()) {
 					System.out.println(myAgent.getLocalName()+

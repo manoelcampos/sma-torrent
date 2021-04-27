@@ -56,58 +56,53 @@ public class TorrentClientAgent extends Agent {
 	
 	public void registerFindPeersBehaviour(int row) {
 		XmlTorrentDataModel dm = gui.getDataModel();
-		addBehaviour(new FindPeersBehaviour(this, 5000, dm, dm.getInfoHash(row)));
+		addBehaviour(new FindPeersBehaviour(this, 5000, dm, dm.getRow(row).getInfoHash()));
 	}
-	
-	/**Register a torrent file in the Jade Directory Facilitator 
+
+
+	public void registerTorrent(final String infoHash, final String bitField) throws FIPAException {
+		final TorrentConfigEntry t = new TorrentConfigEntry();
+		t.setInfoHash(infoHash).setBitField(bitField);
+		registerTorrent(t);
+	}
+
+	/**Register a torrent file in the Jade Directory Facilitator
 	 * to indicate that the client agent has the torrent
 	 * to share with others and/or to get pieces from others
 	 * agents.
-	 * @param infoHash The hash of torrent file info field, in hexadecimal format,
-	 *  to be registered in Jade Directory Facilitator. This hash
-	 *  identify one torrent uniquely.
-	 * @param bitField A string where positions with 1 indicates 
-	 * the pieces that the client already has.
-	 * @param downloaded The amount of bytes already downloaded for the torrent from
-	 * others client agents.
-	 * @param uploaded The amount of bytes already uploaded for the torrent
-	 * to others client agents.
 	 * @throws FIPAException When the torrent cannot be registered in Jade DF because a FIPA error.*/
-	public void registerTorrent(String infoHash, String bitField, int downloaded, int uploaded) 
-	  throws FIPAException {
+	public void registerTorrent(final TorrentConfigEntry torrent) throws FIPAException {
 		ServiceDescription sd = new ServiceDescription();
 		sd.setName(FILE_SHARING);
-		sd.setType(infoHash);
-		sd.addProperties(new Property("downloaded", downloaded));
-		sd.addProperties(new Property("uploaded", uploaded));
-		sd.addProperties(new Property("bitfield", bitField));
+		sd.setType(torrent.getInfoHash());
+		sd.addProperties(new Property("downloaded", torrent.getDownloaded()));
+		sd.addProperties(new Property("uploaded", torrent.getUploaded()));
+		sd.addProperties(new Property("bitfield", torrent.getBitField()));
 		dfd.addServices(sd);
 		if(!dfAgentDescriptionRegistered)
            DFService.register(this, dfd);
-		else DFService.modify(this, dfd); 
-        System.out.println(this.getLocalName()+ 
-        	": Service registered for the torrent  " + infoHash);
+		else DFService.modify(this, dfd);
+        System.out.println(this.getLocalName()+
+        	": Service registered for the torrent  " + torrent.getInfoHash());
         dfAgentDescriptionRegistered = true;
 	}
-	
+
 	/**Register all torrents included in the XML config file,
 	 * of client application, in the Jade Directory Facilitator.
 	 * @param dm The XmlTorrentDataModel that loads the XML config file.
 	 * This file contains the torrents added to the client program.
 	 * The method get information about torrents from this file to register
 	 * the torrents in the Jade Directory Facilitator.
-	 * 
+	 *
 	 * @throws FIPAException When the torrent cannot be registered in Jade DF.*/
 	public void registerTorrents(XmlTorrentDataModel dm)
 	  throws FIPAException {
 		for(int r = 0; r < dm.getRowCount(); r++) {
-			if(dm.getStatus(r).compareToIgnoreCase(Torrent.STARTED)==0)
-			    registerTorrent(
-			    	dm.getInfoHash(r), dm.getBitField(r), 
-			    	dm.getDownloaded(r), dm.getUploaded(r));
+			if(dm.getRow(r).getStatus().compareToIgnoreCase(Torrent.STARTED)==0)
+			    registerTorrent(dm.getRow(r));
 		}
 	}
-	
+
 	/**Deregister a torrent from the Jade Directory Facilitator.
 	 * This method must be called when the user pause/stop
 	 * a torrent in the graphical interface, indicating
@@ -126,17 +121,17 @@ public class TorrentClientAgent extends Agent {
 		sd.setName(FILE_SHARING);
 		sd.setType(infoHash);
 		dfDesc.removeServices(sd);
-		DFService.modify(this, dfDesc); 
+		DFService.modify(this, dfDesc);
 		System.out.println(getLocalName()+ ": Service deregistered");
 	}
-	
+
         @Override
 	protected void takeDown() {
 		try {
 		  gui.getDataModel().saveXml();
 		} catch(IOException e) {
 			JOptionPane.showMessageDialog(
-			    gui, e.getLocalizedMessage(), 
+			    gui, e.getLocalizedMessage(),
 				"Error", JOptionPane.ERROR_MESSAGE);
 		}
 

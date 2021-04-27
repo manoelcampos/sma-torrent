@@ -1,17 +1,10 @@
 package com.manoelcampos.smatorrent;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
-
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.bind.JAXB;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,41 +22,14 @@ import java.util.List;
  * @author Manoel Campos da Silva Filho
  */
 public class XmlTorrentDataModel extends AbstractTableModel {
-    //TABLE META DATA
-    public static final String ROOT_ELEMENT_TAG = "torrent";
-
-    public static final String[] colNames = {
-            "description", "fileName", "fileSize",
-            "status", "percentCompleted", "uploaded", "downloaded", "infoHash",
-            "pieceLength", "bitField", "complete", "incomplete", "elapsedMinutes"
-    };
-
     public static final String[] colCaptions = {
             "Description", "File Name", "File Size",
             "Status", "% Completed", "Uploaded", "Downloaded", "Info Hash",
             "Piece Length", "Bit Field", "Seeders", "Leechers", "Elapsed(min)"
     };
 
-    public static final Class[] colClasses = {
-            String.class, String.class, String.class,
-            String.class, String.class, String.class,
-            String.class, String.class, String.class,
-            String.class, String.class, String.class,
-            String.class
-    };
-
-    public static final int
-            descriptionCol = 0, fileNameCol = 1, fileSizeCol = 2, statusCol = 3,
-            percentCompletedCol = 4, uploadedCol = 5, downloadedCol = 6, infoHashCol = 7,
-            pieceLengthCol = 8, bitFieldCol = 9, completeCol = 10, incompleteCol = 11,
-            elapsedMinutesCol = 12;
-
-    private static final long serialVersionUID = 437192815338852310L;
     private final String xmlFileName;
-
-    //DATA
-    //DOM object to hold XML document contents
-    protected Document doc;
+    private final TorrentsConfig torrents;
 
     //used to hold a list of TableModelListeners
     protected List<Object> tableModelListeners = new ArrayList<>();
@@ -76,52 +42,38 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      */
-    public XmlTorrentDataModel(String xmlFileName)
-            throws ParserConfigurationException, SAXException, IOException {
+    public XmlTorrentDataModel(String xmlFileName) throws ParserConfigurationException, IOException {
         this.xmlFileName = xmlFileName;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(false);
-        DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-        doc = docBuilder.parse(new File(xmlFileName));
+        this.torrents = JAXB.unmarshal(new File(xmlFileName), TorrentsConfig.class);
     }
 
     public void removeRow(int row) {
         int rowCount = getRowCount();
         if (rowCount > 0 && row >= 0 && row < rowCount) {
-            Element parent = doc.getDocumentElement();
-            Node node = doc.getElementsByTagName(ROOT_ELEMENT_TAG).item(row);
-            parent.removeChild(node);
-
-            //Informa a JTable que houve dados deletados passando a
-            //linha removida
+            torrents.remove(row);
+            //Informa a JTable que houve dados deletados passando a linha removida
             fireTableRowsDeleted(row, row);
         }
     }
 
-    public void addRow(String description, String fileName,
-                       Long fileSize, String status, Integer completed, Long uploaded,
-                       Long downloaded, String infoHash,
-                       Integer pieceLength, String bitField) {
-        Element parent = doc.getDocumentElement();
-        Element el = doc.createElement(ROOT_ELEMENT_TAG);
-        el.setAttribute(colNames[descriptionCol], description);
-        el.setAttribute(colNames[fileNameCol], fileName);
-        el.setAttribute(colNames[fileSizeCol], fileSize.toString());
-        el.setAttribute(colNames[statusCol], status);
-        el.setAttribute(colNames[percentCompletedCol], completed.toString());
-        el.setAttribute(colNames[uploadedCol], uploaded.toString());
-        el.setAttribute(colNames[downloadedCol], downloaded.toString());
-        el.setAttribute(colNames[infoHashCol], infoHash);
-        el.setAttribute(colNames[pieceLengthCol], pieceLength.toString());
-        el.setAttribute(colNames[bitFieldCol], bitField);
-        el.setAttribute(colNames[completeCol], "0");
-        el.setAttribute(colNames[incompleteCol], "0");
-        el.setAttribute(colNames[elapsedMinutesCol], "0.0");
-        parent.appendChild(el);
+    public void addRow(TorrentInfoField info, String fileName,
+                       String status, Long downloaded, String infoHash,
+                       String bitField)
+    {
+        final TorrentConfigEntry entry = new TorrentConfigEntry();
+        entry.setDescription(info.getName())
+             .setFileName(fileName)
+             .setFileSize(info.getLength())
+             .setStatus(status)
+             .setDownloaded(downloaded)
+             .setInfoHash(infoHash)
+             .setPieceLength(info.getPieceLength())
+             .setBitField(bitField);
 
-        // Informa a jtable de que houve linhas incluidas no modelo
+        // Informa a jtable de que houve linhas incluidas no modelo.
         // Como adicionamos no final, pegamos o tamanho total do modelo
         // menos 1 para obter a linha incluida.
+        torrents.add(entry);
         int lines = getRowCount() - 1;
         fireTableRowsInserted(lines, lines);
         System.out.println("Row added to JTable Model at line " + lines);
@@ -138,7 +90,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      */
     @Override
     public int getColumnCount() {
-        return colClasses.length;
+        return TorrentConfigEntry.fields.length;
     }
 
     /**
@@ -148,8 +100,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      */
     @Override
     public int getRowCount() {
-        NodeList nl = doc.getElementsByTagName(ROOT_ELEMENT_TAG);
-        return nl.getLength();
+        return torrents.size();
     }
 
     /**
@@ -161,17 +112,23 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int r, int c) {
-        //must get row first
-        //Element row = doc.getDocumentElement();
-        //row.getAttribute(name)
-
-        NodeList nl = doc.getElementsByTagName(ROOT_ELEMENT_TAG);
-        NamedNodeMap atribs = nl.item(r).getAttributes();
-
-        Node node = atribs.getNamedItem(colNames[c]);
-        if (node != null)
-            return node.getNodeValue();
-        return "";
+        final TorrentConfigEntry torrent = torrents.get(r);
+        return switch (c){
+            case 0 -> torrent.getDescription();
+            case 1 -> torrent.getFileName();
+            case 2 -> torrent.getFileSize();
+            case 3 -> torrent.getStatus();
+            case 4 -> torrent.getPercentCompleted();
+            case 5 -> torrent.getUploaded();
+            case 6 -> torrent.getDownloaded();
+            case 7 -> torrent.getInfoHash();
+            case 8 -> torrent.getPieceLength();
+            case 9 -> torrent.getBitField();
+            case 10 -> torrent.getComplete();
+            case 11 -> torrent.getIncomplete();
+            case 12 -> torrent.getElapsedMinutes();
+            default -> "";
+        };
     }
 
     /**
@@ -184,9 +141,10 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * corresponding to the infoHash, or -1 if not found.
      */
     public int findTorrent(String infoHash) {
-        for (int r = 0; r < getRowCount(); r++) {
-            if (infoHash.compareToIgnoreCase(getInfoHash(r)) == 0)
-                return r;
+        final List<TorrentConfigEntry> torrents = this.torrents.getTorrents();
+        for (int i = 0; i < torrents.size(); i++) {
+            if(torrents.get(i).sameHash(infoHash))
+                return i;
         }
 
         return -1;
@@ -198,132 +156,21 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @param r A specific row in the XML file that stores the loaded torrents.
      * @return Returns true if the torrent is complete, otherwise, returns false
      */
-    public boolean isCompleted(int r) {
-        return getDownloaded(r) >= getFileSize(r);
+    public boolean isCompleted(final int r) {
+        final TorrentConfigEntry t = torrents.get(r);
+        return t.getDownloaded() >= t.getFileSize();
     }
 
-    public int missingPiecesCount(int r) {
-        String bitField = getBitField(r);
+    public int missingPiecesCount(final int r) {
+        final TorrentConfigEntry t = torrents.get(r);
         int count = 0;
-        for (int i = 0; i < bitField.length(); i++)
-            if (bitField.charAt(i) == '0')
+        for (int i = 0; i < t.getBitField().length(); i++)
+            if (t.getBitField().charAt(i) == '0')
                 count++;
 
         return count;
     }
 
-    public int getDownloaded(int r) {
-        Object val = getValueAt(r, downloadedCol);
-        if (val != null)
-            return Integer.parseInt(val.toString());
-        return 0;
-    }
-
-    public int getUploaded(int r) {
-        Object val = getValueAt(r, uploadedCol);
-        if (val != null)
-            return Integer.parseInt(val.toString());
-        return 0;
-    }
-
-    /**
-     * Get the number of seeders
-     *
-     * @param r The row number of the entry in the XML
-     * @return The number of seeders
-     */
-    public int getComplete(int r) {
-        Object val = getValueAt(r, completeCol);
-        if (val != null) {
-            try {
-                return Integer.parseInt(val.toString());
-            } catch (NumberFormatException e) {
-                throw new NumberFormatException(e.getMessage() + " at row " + r);
-            }
-        }
-
-        return 0;
-    }
-
-    /**
-     * Get the number of leechers
-     *
-     * @param r The row number of the entry in the XML
-     * @return The number of leechers
-     */
-    public int getIncomplete(int r) {
-        Object val = getValueAt(r, incompleteCol);
-        if (val != null)
-            return Integer.parseInt(val.toString());
-
-        return 0;
-    }
-
-    /**
-     * Get the count of peers (seeders + leechers)
-     *
-     * @param r The row number of the entry in the XML
-     * @return The number of peers
-     */
-    public int getPeersCount(int r) {
-        return getComplete(r) + getIncomplete(r);
-    }
-
-    public int getFileSize(int r) {
-        Object val = getValueAt(r, fileSizeCol);
-        if (val != null)
-            return Integer.parseInt(val.toString());
-
-        return 0;
-    }
-
-    public double getElapsedMinutos(int r) {
-        Object val = getValueAt(r, elapsedMinutesCol);
-        if (val != null)
-            return Double.parseDouble(val.toString());
-
-        return 0.0;
-    }
-
-    public int getPieceLength(int r) {
-        Object val = getValueAt(r, pieceLengthCol);
-        if (val != null)
-            return Integer.parseInt(val.toString());
-
-        return 0;
-    }
-
-    public String getDescription(int r) {
-        Object val = getValueAt(r, descriptionCol);
-        if (val != null)
-            return val.toString();
-
-        return "";
-    }
-
-    public String getInfoHash(int r) {
-        Object val = getValueAt(r, infoHashCol);
-        if (val != null)
-            return val.toString();
-
-        return "";
-    }
-
-    public String getStatus(int r) {
-        Object val = getValueAt(r, statusCol);
-        if (val != null)
-            return val.toString();
-
-        return "";
-    }
-
-    public String getBitField(int r) {
-        Object val = getValueAt(r, bitFieldCol);
-        if (val != null)
-            return val.toString();
-
-        return "";
-    }
 
     /**
      * Return the name of column for the table.
@@ -345,7 +192,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     @SuppressWarnings("unchecked")
     @Override
     public Class getColumnClass(int c) {
-        return colClasses[c];
+        return TorrentConfigEntry.fields[c].getDeclaringClass();
     }
 
     /**
@@ -368,53 +215,33 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @param c     the column whose value is to be changed
      */
     @Override
-    public void setValueAt(Object value, int r, int c) {
-        NodeList nl = doc.getElementsByTagName(ROOT_ELEMENT_TAG);
-        NamedNodeMap atribs = nl.item(r).getAttributes();
-
-        Node node = atribs.getNamedItem(colNames[c]);
-        node.setNodeValue(value.toString());
-        atribs.setNamedItem(node);
-        fireTableCellUpdated(r, c);
+    public void setValueAt(final Object value, final int r, final int c) {
+        torrents.setFieldValue(value, r, c);
     }
 
     /**
      * Add the downloadedPieceLength to the value of the field downloaded.
      *
-     * @param downloadedPieceLength The value to add to the
-     *                              downloaded field
+     * @param downloadedPieceLength The value to add to the downloaded field
      * @param r
      */
-    public void addDownloaded(long downloadedPieceLength, int r) {
-        NodeList nl = doc.getElementsByTagName(ROOT_ELEMENT_TAG);
-        NamedNodeMap atribs = nl.item(r).getAttributes();
-
-        Node node = atribs.getNamedItem(colNames[downloadedCol]);
-
-        Long value = getDownloaded(r) + downloadedPieceLength;
-        node.setNodeValue(value.toString());
-        atribs.setNamedItem(node);
-        fireTableCellUpdated(r, downloadedCol);
+    public void addDownloaded(final long downloadedPieceLength, final int r) {
+        final TorrentConfigEntry t = torrents.get(r);
+        t.setDownloaded(downloadedPieceLength);
+        fireTableRowsUpdated(r, r);
     }
 
 
     /**
      * Add the newElapsedMinutes to the value of the field elapsedMinutes.
      *
-     * @param newElapsedMinutes The value to add to the
-     *                          elapsedMinutes field
+     * @param newElapsedMinutes The value to add to the elapsedMinutes field
      * @param r
      */
     public void addElapsedMinutes(Double newElapsedMinutes, int r) {
-        NodeList nl = doc.getElementsByTagName(ROOT_ELEMENT_TAG);
-        NamedNodeMap atribs = nl.item(r).getAttributes();
-
-        Node node = atribs.getNamedItem(colNames[elapsedMinutesCol]);
-
-        Double value = getElapsedMinutos(r) + newElapsedMinutes;
-        node.setNodeValue(value.toString());
-        atribs.setNamedItem(node);
-        fireTableCellUpdated(r, elapsedMinutesCol);
+        final TorrentConfigEntry t = torrents.get(r);
+        t.setElapsedMinutes(newElapsedMinutes);
+        fireTableRowsUpdated(r, r);
     }
 
     /**
@@ -444,12 +271,10 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     }
 
     public void saveXml() throws IOException {
-        File file = new File(xmlFileName);
-        XMLSerializer serializer =
-                new XMLSerializer(new FileOutputStream(file),
-                        new OutputFormat(doc, "iso-8859-1", true));
-
-        serializer.serialize(doc);
+        JAXB.marshal(torrents, new File(xmlFileName));
     }
 
+    public TorrentConfigEntry getRow(final int row){
+        return torrents.get(row);
+    }
 }

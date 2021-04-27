@@ -69,7 +69,7 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		try {
 		    path = new File(".").getCanonicalPath();
 		    path += File.separator + "bin" + File.separator;
-		    originalFileName = path+dm.getDescription(row);
+		    originalFileName = path+dm.getRow(row).getDescription();
 		    tmpFileName = originalFileName + ".tmp";
 		    File file = new File(tmpFileName);
 
@@ -129,7 +129,7 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		 * a specific piece.*/
 		int aPieceLength =
 			Torrent.getSpecificPieceLength(
-				dm.getFileSize(row), pieceLength, pieceNumber);
+				dm.getRow(row).getFileSize(), pieceLength, pieceNumber);
 
 		String requestMsg = 
 			"<len=0013><id=6><"+pieceNumber+"><"+pieceBegin+"><"+aPieceLength+">";
@@ -274,15 +274,15 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 			
 			byte[] piece = getNextFieldReceivedPieceMsg(pieceMsg, true);
 
-			String auxBitField = dm.getBitField(row);
-			auxBitField = Torrent.setBitFieldPosition(auxBitField, pieceNumber);		
-
-			dm.setValueAt(auxBitField, row, XmlTorrentDataModel.bitFieldCol);
+			String auxBitField = dm.getRow(row).getBitField();
+			auxBitField = Torrent.setBitFieldPosition(auxBitField, pieceNumber);
+			dm.getRow(row).setBitField(auxBitField);
+			dm.fireTableRowsUpdated(row, row);
 		    dm.addDownloaded(piece.length, row);
 		    dm.saveXml();
 		    TorrentClientAgent a = (TorrentClientAgent)myAgent;
 		    a.getGui().setMissingPiecesCountStatus();
-		    long fileLength = dm.getFileSize(row);
+		    long fileLength = dm.getRow(row).getFileSize();
 		    int piecesCount = Torrent.numPieces(fileLength, pieceLength);
 		    sf.writePiece(pieceNumber, piecesCount, piece);
 		} catch(IOException e) {
@@ -345,16 +345,14 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 			System.out.println("Pieces received: " + requestResponsesCount);
 			try {
 			  sf.close();
-			  long fileLength = dm.getFileSize(row);
+			  long fileLength = dm.getRow(row).getFileSize();
 			  SharedFile.reconstructFile(tmpFileName, fileLength, originalFileName);
-			} catch(IOException e) {
-				JOptionPane.showMessageDialog(null, 
-					e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			} catch (InvalidBEncodedStringException e) {
+			} catch(IOException | InvalidBEncodedStringException e) {
 				JOptionPane.showMessageDialog(null, 
 					e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+
 		return isDone;
 	}
 

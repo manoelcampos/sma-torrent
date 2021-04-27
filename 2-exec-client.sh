@@ -9,7 +9,7 @@ CUR=`pwd`
 BASE="$CUR/target"
 DIR="$BASE/clients/$CLI"
 cd $DIR
-java -cp ../../sma-torrent.jar:../../jade.jar jade.Boot -container $CLI:com.manoelcampos.smatorrent.TorrentClientAgent &
+java -cp ../../sma-torrent-1.0.0-with-dependencies.jar jade.Boot -container $CLI:com.manoelcampos.smatorrent.TorrentClientAgent &
 echo "Started Agent/Client '$CLI'"
 cd $CUR
 
