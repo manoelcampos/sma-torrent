@@ -34,8 +34,7 @@ public class TorrentClientAgent extends Agent {
 
     /**
      * Returns the 20 bytes peer identification.
-     * This value is randomically setted in the setup
-     * method.
+     * This value is randomly set in the setup method.
      *
      * @return
      */
