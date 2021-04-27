@@ -4,9 +4,10 @@ import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Hashtable;
+import java.util.Map;
 
 //TODO A implementação está sendo feita para torrent de apenas um arquivo
-public class TorrentInfoField {
+public final class TorrentInfoField {
     //Required fields
     /**
      * Number of bytes in each piece
@@ -59,7 +60,7 @@ public class TorrentInfoField {
      * of the dictionary info of a torrent file,
      * and some useful optional fields
      */
-    public TorrentInfoField(String name, int pieceLength, byte[] pieces) {
+    public TorrentInfoField(final String name, final int pieceLength, final byte[] pieces) {
         setName(name);
         setPieceLength(pieceLength);
         setPieces(pieces);
@@ -70,14 +71,17 @@ public class TorrentInfoField {
      * Class constructor with all fields
      * of the dictionary info of a torrent file: required and optional
      */
-    public TorrentInfoField(String name, int pieceLength, byte[] pieces, String md5sum, int privateField) {
+    public TorrentInfoField(
+            final String name, final int pieceLength, final  byte[] pieces,
+            final String md5sum, final int privateField)
+    {
         this(name, pieceLength, pieces);
         setMd5sum(md5sum);
         setPrivateField(privateField);
     }
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        final StringBuffer s = new StringBuffer();
 
         s.append("name: " + this.name);
         s.append("\nlength: " + this.length);
@@ -96,9 +100,8 @@ public class TorrentInfoField {
      *
      * @param ht The Hashtable containing the torrent file field values
      */
-    public void loadFieldsFromHashtable(Hashtable<String, byte[]> ht) {
-        String value;
-        value = BEncode.byteArrayToStr(ht.get("length"));
+    public void loadFieldsFromHashtable(final Map<String, byte[]> ht) {
+        String value = BEncode.byteArrayToStr(ht.get("length"));
         if (value != "")
             this.length = Integer.parseInt(value);
         this.md5sum = BEncode.byteArrayToStr(ht.get("md5sum"));
@@ -119,7 +122,7 @@ public class TorrentInfoField {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
         File f = new File(name);
         this.length = f.length();
@@ -129,7 +132,7 @@ public class TorrentInfoField {
         return pieceLength;
     }
 
-    public void setPieceLength(int pieceLength) {
+    public void setPieceLength(final int pieceLength) {
         this.pieceLength = pieceLength;
     }
 
@@ -137,7 +140,7 @@ public class TorrentInfoField {
         return pieces;
     }
 
-    public void setPieces(byte[] pieces) {
+    public void setPieces(final byte[] pieces) {
         this.pieces = pieces;
     }
 
@@ -157,7 +160,7 @@ public class TorrentInfoField {
         return md5sum;
     }
 
-    public void setMd5sum(String md5sum) {
+    public void setMd5sum(final String md5sum) {
         this.md5sum = md5sum;
     }
 
@@ -170,9 +173,9 @@ public class TorrentInfoField {
      *                                  specified doesn't exists.
      */
     public String hash() throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA1");
+        final var md = MessageDigest.getInstance("SHA1");
         md.update(getPieces());
-        byte[] hashBytes = md.digest();
+        final byte[] hashBytes = md.digest();
 
         return BEncode.byteArrayToHexStr(hashBytes);
     }

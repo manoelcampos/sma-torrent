@@ -35,7 +35,7 @@ public class TorrentConfigEntry implements Serializable {
         return description;
     }
 
-    public TorrentConfigEntry setDescription(String description) {
+    public TorrentConfigEntry setDescription(final String description) {
         this.description = description;
         return this;
     }
@@ -44,7 +44,7 @@ public class TorrentConfigEntry implements Serializable {
         return fileName;
     }
 
-    public TorrentConfigEntry setFileName(String fileName) {
+    public TorrentConfigEntry setFileName(final String fileName) {
         this.fileName = fileName;
         return this;
     }
@@ -53,7 +53,7 @@ public class TorrentConfigEntry implements Serializable {
         return fileSize;
     }
 
-    public TorrentConfigEntry setFileSize(long fileSize) {
+    public TorrentConfigEntry setFileSize(final long fileSize) {
         this.fileSize = fileSize;
         return this;
     }
@@ -62,7 +62,7 @@ public class TorrentConfigEntry implements Serializable {
         return status;
     }
 
-    public TorrentConfigEntry setStatus(String status) {
+    public TorrentConfigEntry setStatus(final String status) {
         this.status = status;
         return this;
     }
@@ -80,7 +80,7 @@ public class TorrentConfigEntry implements Serializable {
         return uploaded;
     }
 
-    public TorrentConfigEntry setUploaded(double uploaded) {
+    public TorrentConfigEntry setUploaded(final double uploaded) {
         this.uploaded = uploaded;
         return this;
     }
@@ -98,7 +98,7 @@ public class TorrentConfigEntry implements Serializable {
         return infoHash;
     }
 
-    public TorrentConfigEntry setInfoHash(String infoHash) {
+    public TorrentConfigEntry setInfoHash(final String infoHash) {
         this.infoHash = infoHash;
         return this;
     }
@@ -107,7 +107,7 @@ public class TorrentConfigEntry implements Serializable {
         return pieceLength;
     }
 
-    public TorrentConfigEntry setPieceLength(int pieceLength) {
+    public TorrentConfigEntry setPieceLength(final int pieceLength) {
         this.pieceLength = pieceLength;
         return this;
     }
@@ -116,7 +116,7 @@ public class TorrentConfigEntry implements Serializable {
         return bitField;
     }
 
-    public TorrentConfigEntry setBitField(String bitField) {
+    public TorrentConfigEntry setBitField(final String bitField) {
         this.bitField = bitField;
         return this;
     }
@@ -134,7 +134,7 @@ public class TorrentConfigEntry implements Serializable {
         return incomplete;
     }
 
-    public TorrentConfigEntry setIncomplete(int incomplete) {
+    public TorrentConfigEntry setIncomplete(final int incomplete) {
         this.incomplete = incomplete;
         return this;
     }
@@ -143,7 +143,7 @@ public class TorrentConfigEntry implements Serializable {
         return elapsedMinutes;
     }
 
-    public TorrentConfigEntry setElapsedMinutes(double elapsedMinutes) {
+    public TorrentConfigEntry setElapsedMinutes(final double elapsedMinutes) {
         this.elapsedMinutes = elapsedMinutes;
         return this;
     }
@@ -172,5 +172,4 @@ public class TorrentConfigEntry implements Serializable {
             throw new RuntimeException(e);
         }
     }
-
 }

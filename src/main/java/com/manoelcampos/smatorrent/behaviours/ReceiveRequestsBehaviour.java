@@ -113,16 +113,15 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 						": File not found '" + fileName + "'");
 					return;
 				}
-				SharedFile sf = new SharedFile(fileName);
+				final SharedFile sf = new SharedFile(fileName);
 				//X is the length of the block
 				//piece msg: <len=0009+X><id=7><index><begin><block>
-				byte[] piece = sf.getPiece(pieceNumber, pieceLength);
-				byte[] terminator = {'>'};
-				String aux = 
+				final byte[] piece = sf.getPiece(pieceNumber, pieceLength);
+				final byte[] terminator = {'>'};
+				final String aux =
 					"<len=0009+"+pieceLength+"><id=7>" +
 					"<"+pieceNumber+"><"+begin+"><";
-				byte[] pieceMsg = 
-					new byte[aux.length() + piece.length + 1];
+				final byte[] pieceMsg = new byte[aux.length() + piece.length + 1];
 				
 				//Transfer the content as a byte array
 				System.arraycopy(
@@ -152,21 +151,21 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 		switch(reply.getPerformative()) {
 			case ACLMessage.INFORM:
 				System.out.println(
-					myAgent.getLocalName() + ": Piece " + pieceNumber + 
+					myAgent.getLocalName() + ": Piece " + pieceNumber +
 					" sended to " + receivedMsg.getSender().getLocalName());
 			break;
 			case ACLMessage.REFUSE:
-				System.out.println(myAgent.getLocalName() + 
+				System.out.println(myAgent.getLocalName() +
 					": Refuse msg sended '" +
-					reply.getContent() + "' to " + 
+					reply.getContent() + "' to " +
 					receivedMsg.getSender().getLocalName());
 			break;
 		}
 	}
 	
+	/** Executes the action of the behaviour, waiting for Call For Proposal
+	 * (handshake msgs) or Accept Proposal (a request of a piece).*/
 	@Override
-	/**Executes the action of the behaviour, waiting for Call For Proposal 
-	 * (handshake msgs) or Acccept Proposal (a request of a piece).*/
 	public void action() {
 		System.out.println(myAgent.getLocalName() + ": Waiting request msgs"); 
 		MessageTemplate template =
@@ -177,9 +176,9 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 		
 		ACLMessage msg = myAgent.receive(template);
 		if(msg != null) {
-			switch(msg.getPerformative()) {
-				case ACLMessage.CFP: attendCPF(msg); break;
-				case ACLMessage.ACCEPT_PROPOSAL: sendPiece(msg); break;
+			switch (msg.getPerformative()) {
+				case ACLMessage.CFP -> attendCPF(msg);
+				case ACLMessage.ACCEPT_PROPOSAL -> sendPiece(msg);
 			}
 		}
 		else block();

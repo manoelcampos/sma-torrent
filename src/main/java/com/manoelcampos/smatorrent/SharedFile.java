@@ -15,9 +15,9 @@ import java.text.DecimalFormat;
  * of a received file, to the original order
  * and format of file.
  * @author Manoel Campos da Silva Filho*/
-public class SharedFile { 
+public class SharedFile implements AutoCloseable{
 	private File file;
-	private RandomAccessFile raf = null;
+	private RandomAccessFile raf;
 	
 	/**Class constructor used when you want to get a piece
 	 * of a shared file to send to other client
@@ -29,7 +29,7 @@ public class SharedFile {
 	 * to another peer.
 	 * @see SharedFile#writePiece(Integer, Integer, byte[])
 	 * @see SharedFile#getPiece(int, int)*/
-	public SharedFile(String fileName) throws IOException {
+	public SharedFile(final String fileName) throws IOException {
 		this(new File(fileName));
 	}
 	
@@ -43,7 +43,7 @@ public class SharedFile {
 	 * to another peer.
 	 * @see SharedFile#writePiece(Integer, Integer, byte[])
 	 * @see SharedFile#getPiece(int, int)*/
-	public SharedFile(File file) throws IOException {
+	public SharedFile(final File file) throws IOException {
 		super();
 		this.file = file;
 		raf = new RandomAccessFile(file, "rw");
@@ -54,11 +54,11 @@ public class SharedFile {
 	 * @param pieceLength The length of the piece to be returned
 	 * @return Returns a byte array with the content of the requested
 	 * piece of file.*/
-	public byte[] getPiece(int pieceNumber, int pieceLength) throws IOException {
-		long start = pieceLength * pieceNumber;
+	public byte[] getPiece(final int pieceNumber, final int pieceLength) throws IOException {
+		final long start = pieceLength * pieceNumber;
 		raf.seek(start);
-		
-		byte[] b = new byte[pieceLength];
+
+		final byte[] b = new byte[pieceLength];
 		
 		int off=0, readed=0;
 		while((off += readed) < pieceLength && readed > -1) 
@@ -72,12 +72,12 @@ public class SharedFile {
 	 * @param pieceNumber The zero-based index of the piece
 	 * @param piecesCount The count of the file pieces
 	 * @param piece The piece to be writed in the temporary file */
-	public void writePiece(Integer pieceNumber, Integer piecesCount, byte[] piece) throws IOException {
+	public void writePiece(final Integer pieceNumber, final Integer piecesCount, final byte[] piece) throws IOException {
 		raf.seek(file.length());
-		
-		int numDigits = piecesCount.toString().length();
-		String format = StrUtils.stringOfChar('0', numDigits);
-		DecimalFormat df = new DecimalFormat(format);
+
+		final int numDigits = piecesCount.toString().length();
+		final String format = StrUtils.stringOfChar('0', numDigits);
+		final DecimalFormat df = new DecimalFormat(format);
 		df.setDecimalSeparatorAlwaysShown(false);
 		
 		raf.writeBytes(BEncode.bstring(df.format(pieceNumber)));
@@ -96,17 +96,18 @@ public class SharedFile {
 	 * @param originalFileLength The length of the original file,
 	 * before be divided in pieces.
 	 * @param newFileName The name of the reconstructed file*/
-	public static void reconstructFile(String inputTmpFileName, 
-			long originalFileLength, String newFileName) 
-	  throws IOException, InvalidBEncodedStringException {	    
-	    File inputTmpFile = new File(inputTmpFileName);
-	    DataInputStream is = 
+	public static void reconstructFile(
+			final String inputTmpFileName, final long originalFileLength, final String newFileName)
+	  		throws IOException, InvalidBEncodedStringException
+	{
+		final File inputTmpFile = new File(inputTmpFileName);
+		final DataInputStream is =
 	    	new DataInputStream(
 	    		new BufferedInputStream(
 	    			new FileInputStream(inputTmpFile)));
-	    
-	    File outputFile = new File(newFileName);
-	    RandomAccessFile of = new RandomAccessFile(outputFile, "rw");
+
+		final File outputFile = new File(newFileName);
+		final RandomAccessFile of = new RandomAccessFile(outputFile, "rw");
 	    of.setLength(originalFileLength);
 		
 		byte[] bencodedField, piece;
@@ -138,6 +139,7 @@ public class SharedFile {
 	}
 	
 	/**Closes the opened file in the class constructor*/
+	@Override
 	public void close() throws IOException {
 		if(raf != null)
 		   raf.close();

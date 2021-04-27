@@ -46,7 +46,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
         this.torrents = JAXB.unmarshal(new File(xmlFileName), TorrentsConfig.class);
     }
 
-    public void removeRow(int row) {
+    public void removeRow(final int row) {
         int rowCount = getRowCount();
         if (rowCount > 0 && row >= 0 && row < rowCount) {
             torrents.remove(row);
@@ -110,7 +110,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @return the value Object at the specified cell
      */
     @Override
-    public Object getValueAt(int r, int c) {
+    public Object getValueAt(final int r, final int c) {
         final TorrentConfigEntry torrent = torrents.get(r);
         return switch (c){
             case 0 -> torrent.getDescription();
@@ -139,7 +139,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @return Returns the row number of the torrent
      * corresponding to the infoHash, or -1 if not found.
      */
-    public int findTorrent(String infoHash) {
+    public int findTorrent(final String infoHash) {
         final List<TorrentConfigEntry> torrents = this.torrents.getTorrents();
         for (int i = 0; i < torrents.size(); i++) {
             if(torrents.get(i).sameHash(infoHash))
@@ -178,7 +178,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @return the name of the column
      */
     @Override
-    public String getColumnName(int c) {
+    public String getColumnName(final int c) {
         return colCaptions[c];
     }
 
@@ -190,7 +190,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Class getColumnClass(int c) {
+    public Class getColumnClass(final int c) {
         return TorrentConfigEntry.fields[c].getDeclaringClass();
     }
 
@@ -202,7 +202,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @return true if the cell is editable.
      */
     @Override
-    public boolean isCellEditable(int r, int c) {
+    public boolean isCellEditable(final int r, final int c) {
         return false;
     }
 
@@ -237,7 +237,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @param newElapsedMinutes The value to add to the elapsedMinutes field
      * @param r
      */
-    public void addElapsedMinutes(Double newElapsedMinutes, int r) {
+    public void addElapsedMinutes(final Double newElapsedMinutes, final int r) {
         final TorrentConfigEntry t = torrents.get(r);
         t.setElapsedMinutes(newElapsedMinutes);
         fireTableRowsUpdated(r, r);
@@ -250,7 +250,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @param l the TableModelListener
      */
     @Override
-    public void addTableModelListener(TableModelListener l) {
+    public void addTableModelListener(final TableModelListener l) {
         //Add a listener only if the listener is not already registered
         if (!tableModelListeners.contains(l))
             tableModelListeners.add(l);
@@ -263,7 +263,7 @@ public class XmlTorrentDataModel extends AbstractTableModel {
      * @param l the TableModelListener
      */
     @Override
-    public void removeTableModelListener(TableModelListener l) {
+    public void removeTableModelListener(final TableModelListener l) {
         //Remove a listener only if the listener is already registered
         if (tableModelListeners.contains(l))
             tableModelListeners.remove(l);

@@ -18,7 +18,7 @@ public class TorrentsConfig {
         return torrents;
     }
 
-    public void setTorrents(List<TorrentConfigEntry> torrents) {
+    public void setTorrents(final List<TorrentConfigEntry> torrents) {
         this.torrents = torrents;
     }
 

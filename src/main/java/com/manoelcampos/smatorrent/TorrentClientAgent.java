@@ -59,7 +59,7 @@ public class TorrentClientAgent extends Agent {
         //The peerId must have 20 characters length
         peerId = "IT" + MainForm.APP_VERSION + rand;
 
-        XmlTorrentDataModel dm = gui.getDataModel();
+        final XmlTorrentDataModel dm = gui.getDataModel();
         addBehaviour(new ReceiveRequestsBehaviour(this, dm));
         for (int row = 0; row < dm.getRowCount(); row++) {
             if (!dm.isCompleted(row))
@@ -67,8 +67,8 @@ public class TorrentClientAgent extends Agent {
         }
     }
 
-    public void registerFindPeersBehaviour(int row) {
-        XmlTorrentDataModel dm = gui.getDataModel();
+    public void registerFindPeersBehaviour(final int row) {
+        final XmlTorrentDataModel dm = gui.getDataModel();
         addBehaviour(new FindPeersBehaviour(this, 5000, dm, dm.getRow(row).getInfoHash()));
     }
 
@@ -87,7 +87,7 @@ public class TorrentClientAgent extends Agent {
      * @throws FIPAException When the torrent cannot be registered in Jade DF because a FIPA error.
      */
     public void registerTorrent(final TorrentConfigEntry torrent) throws FIPAException {
-        ServiceDescription sd = new ServiceDescription();
+        final var sd = new ServiceDescription();
         sd.setName(FILE_SHARING);
         sd.setType(torrent.getInfoHash());
         sd.addProperties(new Property("downloaded", torrent.getDownloaded()));
@@ -112,7 +112,7 @@ public class TorrentClientAgent extends Agent {
      *           the torrents in the Jade Directory Facilitator.
      * @throws FIPAException When the torrent cannot be registered in Jade DF.
      */
-    public void registerTorrents(XmlTorrentDataModel dm) throws FIPAException {
+    public void registerTorrents(final XmlTorrentDataModel dm) throws FIPAException {
         for (int r = 0; r < dm.getRowCount(); r++) {
             if (dm.getRow(r).getStatus().compareToIgnoreCase(Torrent.STARTED) == 0)
                 registerTorrent(dm.getRow(r));
@@ -132,9 +132,9 @@ public class TorrentClientAgent extends Agent {
      *                 identify one torrent uniquely.
      * @throws FIPAException When the torrent cannot be registered in Jade DF because a FIPA error.
      */
-    public void deregisterTorrent(String infoHash) throws FIPAException {
-        DFAgentDescription dfDesc = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
+    public void deregisterTorrent(final String infoHash) throws FIPAException {
+        final var dfDesc = new DFAgentDescription();
+        final var sd = new ServiceDescription();
         dfDesc.setName(getAID());
 
         sd.setName(FILE_SHARING);

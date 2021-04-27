@@ -1,10 +1,8 @@
 package com.manoelcampos.smatorrent;
 
 import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Class that implements a metainfo torrent file.
@@ -92,17 +90,17 @@ public class Torrent {
     public Torrent(InputStream is) throws IOException, InvalidTorrentException {
         this();
 
-        Hashtable<String, byte[]> ht;
+        Map<String, byte[]> map;
         byte[] value;
         try {
-            ht = BEncode.getFields(is);
-            loadFieldsFromHashtable(ht);
+            map = BEncode.getFields(is);
+            loadFieldsFromMap(map);
 
-            value = ht.get("info");
+            value = map.get("info");
             if (value != null && value.length > 0) {
                 ByteArrayInputStream bais = new ByteArrayInputStream(value);
-                ht = BEncode.getFields(bais);
-                info.loadFieldsFromHashtable(ht);
+                map = BEncode.getFields(bais);
+                info.loadFieldsFromHashtable(map);
             }
         } catch (InvalidBEncodedStringException e) {
             throw new InvalidTorrentException(e.getMessage());
@@ -119,8 +117,8 @@ public class Torrent {
      * @return Return a string of length numPieces where positions
      * with 1 indicates the pieces that the client already has.
      */
-    public static String generateBitField(int numPieces, boolean seeder) {
-        StringBuffer sb = new StringBuffer();
+    public static String generateBitField(final int numPieces, final boolean seeder) {
+        final StringBuffer sb = new StringBuffer();
         for (int i = 0; i < numPieces; i++)
             sb.append(seeder ? "1" : "0");
         return sb.toString();
@@ -164,7 +162,8 @@ public class Torrent {
     public static int getSpecificPieceLength(float fileLength, float pieceLength, int pieceNumber) {
         if (pieceNumber == numPieces(fileLength, pieceLength) - 1)
             return lastPieceLength(fileLength, pieceLength);
-        else return (int) pieceLength;
+
+        return (int) pieceLength;
     }
 
     /**
@@ -174,10 +173,9 @@ public class Torrent {
      * @param msg The string to be splitted.
      * @return A array with the parts of the splitted string.
      */
-    public static String[] splitMessage(String msg) {
+    public static String[] splitMessage(final String msg) {
         //Example of message: <pstrlen><pstr><reserved><info_hash><peer_id>
-        msg = msg.replace("<", "");
-        return msg.split(">");
+        return msg.replace("<", "").split(">");
     }
 
     /**
@@ -196,7 +194,7 @@ public class Torrent {
      * If the peer don't have neither piece that the client
      * yeat don't have, the function returns -1
      */
-    public static int chooseRandomPiece(String myBitField, String remotePeerBitField) {
+    public static int chooseRandomPiece(final String myBitField, final String remotePeerBitField) {
         if (myBitField.length() != remotePeerBitField.length())
             return -1;
 
@@ -222,6 +220,7 @@ public class Torrent {
             //the piece number, randomically choosed
             pos = (int) (Math.random() * availablePieces.length());
         } while (availablePieces.charAt(pos) == '0');
+
         return pos;
     }
 
@@ -229,22 +228,21 @@ public class Torrent {
      * Set a position of the bit field to 1, to indicate that
      * the client downloaded the piece of the position indicated.
      *
-     * @param bitField The bit field to have a position setted to 1.
-     * @param pos      The position (number of the piece) to be setted
+     * @param bitField The bit field to have a position set to 1.
+     * @param pos      The position (number of the piece) to be set
      *                 in the bit field. This is a zero based index.
-     * @return A new String bit field with the indicated position
-     * setted to 1.
+     * @return A new String bit field with the indicated position set to 1.
      * @throws IndexOutOfBoundsException When the position is less than zero or
-     *                                   greather or equal than the bit field length
+     *                                   greater or equal than the bit field length
      */
-    public static String setBitFieldPosition(String bitField, int pos) throws IndexOutOfBoundsException {
+    public static String setBitFieldPosition(final String bitField, final int pos) throws IndexOutOfBoundsException {
         if (pos < 0 || pos >= bitField.length())
             throw new IndexOutOfBoundsException(
                     "The position must be grather or equal than 0 and less than the bit field length.");
+
         char[] array = bitField.toCharArray();
         array[pos] = '1';
-        bitField = String.valueOf(array);
-        return bitField;
+        return String.valueOf(array);
     }
 
     /**
@@ -257,7 +255,7 @@ public class Torrent {
      * @return The byte number in the shared file that
      * the specified piece begins
      */
-    public static long pieceBegin(int pieceNumber, long pieceLength) {
+    public static long pieceBegin(final int pieceNumber, final long pieceLength) {
         return pieceLength * pieceNumber;
     }
 
@@ -272,7 +270,7 @@ public class Torrent {
      * @return Return true if all positions in the
      * bit field is 1, otherwise, returns false.
      */
-    public static boolean isSeeder(String bitField) {
+    public static boolean isSeeder(final String bitField) {
         for (int i = 0; i < bitField.length(); i++) {
 			if (bitField.charAt(i) == '0')
 				return false;
@@ -288,20 +286,20 @@ public class Torrent {
      * @throws IOException           When the file cannot be accessed
      * @throws FileNotFoundException When the file doesn't exists
      */
-    public void writeToFile(String torrentFileName) throws IOException, FileNotFoundException {
-        File f = new File(torrentFileName);
+    public void writeToFile(final String torrentFileName) throws IOException, FileNotFoundException {
+        final File f = new File(torrentFileName);
 
-        Calendar cal = Calendar.getInstance();
-        int year, month, day, hour, min, sec;
-        year = cal.get(Calendar.YEAR);
-        month = cal.get(Calendar.MONTH);
-        day = cal.get(Calendar.DAY_OF_MONTH);
-        hour = cal.get(Calendar.HOUR);
-        min = cal.get(Calendar.MINUTE);
-        sec = cal.get(Calendar.SECOND);
+        final Calendar cal = Calendar.getInstance();
+        final int year = cal.get(Calendar.YEAR);
+        final int month = cal.get(Calendar.MONTH);
+        final int day = cal.get(Calendar.DAY_OF_MONTH);
+        final int hour = cal.get(Calendar.HOUR);
+        final int min = cal.get(Calendar.MINUTE);
+        final int sec = cal.get(Calendar.SECOND);
+
         //To convert date to UTC format.
         cal.set(year + 1900, month, day, hour, min, sec);
-        long utcDate = cal.getTime().getTime();
+        final long utcDate = cal.getTime().getTime();
 
         f.createNewFile();
         try(DataOutputStream os = new DataOutputStream(new FileOutputStream(f))) {
@@ -319,7 +317,7 @@ public class Torrent {
             s = BEncode.bDictionaryIntField("creation date", utcDate);
             os.writeBytes(s);
 
-            if (encoding != "") {
+            if (!encoding.isEmpty()) {
                 s = BEncode.bDictionaryStrField("encoding", encoding);
                 os.writeBytes(s);
             }
@@ -329,7 +327,7 @@ public class Torrent {
             s = BEncode.bDictionaryIntField("length", info.getLength());
             os.writeBytes(s);
 
-            if (info.getMd5sum() != "") {
+            if (!info.getMd5sum().isEmpty()) {
                 s = BEncode.bDictionaryStrField("md5sum", info.getMd5sum());
                 os.writeBytes(s);
             }
@@ -353,7 +351,7 @@ public class Torrent {
     }
 
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        final StringBuffer s = new StringBuffer();
 
         s.append("announce: " + this.announce);
         s.append("\ncomment: " + this.comment);
@@ -368,18 +366,18 @@ public class Torrent {
      * Load the class fields from a Hashtable containing the torrent file
      * field values.
      *
-     * @param ht The Hashtable containing the torrent file field values
+     * @param map The Hashtable containing the torrent file field values
      */
-    public void loadFieldsFromHashtable(Hashtable<String, byte[]> ht) {
+    public void loadFieldsFromMap(final Map<String, byte[]> map) {
         String value;
 
-        this.announce = BEncode.byteArrayToStr(ht.get("announce"));
-        this.comment = BEncode.byteArrayToStr(ht.get("comment"));
-        this.createdBy = BEncode.byteArrayToStr(ht.get("created by"));
-        value = BEncode.byteArrayToStr(ht.get("creation date"));
+        this.announce = BEncode.byteArrayToStr(map.get("announce"));
+        this.comment = BEncode.byteArrayToStr(map.get("comment"));
+        this.createdBy = BEncode.byteArrayToStr(map.get("created by"));
+        value = BEncode.byteArrayToStr(map.get("creation date"));
         if (value != "")
             this.creationDate = Long.parseLong(value);
-        this.encoding = BEncode.byteArrayToStr(ht.get("encoding"));
+        this.encoding = BEncode.byteArrayToStr(map.get("encoding"));
     }
 
     public String getAnnounce() {
