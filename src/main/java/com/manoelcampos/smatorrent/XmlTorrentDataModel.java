@@ -35,11 +35,10 @@ public class XmlTorrentDataModel extends AbstractTableModel {
     protected List<Object> tableModelListeners = new ArrayList<>();
 
     /**
-     * Constructor - create a DOM
+     * Creates the table model loading the data from the torrents XML config file.
      *
      * @param xmlFileName
      * @throws javax.xml.parsers.ParserConfigurationException
-     * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      */
     public XmlTorrentDataModel(String xmlFileName) throws ParserConfigurationException, IOException {
