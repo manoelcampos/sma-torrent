@@ -1,16 +1,17 @@
 package com.manoelcampos.smatorrent.behaviours;
 
+import com.manoelcampos.smatorrent.StrUtils;
+import com.manoelcampos.smatorrent.TorrentClientAgent;
+import com.manoelcampos.smatorrent.XmlTorrentDataModel;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
-import jade.domain.FIPAAgentManagement.*;
 import jade.domain.DFService;
-import javax.swing.JOptionPane;
-
-import com.manoelcampos.smatorrent.*;
-
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 /**Class that implements a agent behaviour that periodically
@@ -39,8 +40,10 @@ public class FindPeersBehaviour extends TickerBehaviour {
 	 * @param infoHash The SHA1 20 bytes hash of the torrent file info field,
 	 * that identify uniquelly a torrent. This identify the torrent
 	 * that will be searched for other peers that have the same torrent to share*/
-	public FindPeersBehaviour(Agent a, long period, XmlTorrentDataModel dm,
-	  String infoHash) {
+	public FindPeersBehaviour(
+			final Agent a, final long period, final XmlTorrentDataModel dm,
+		  	final String infoHash)
+	{
 		super(a, period);
 		this.dm = dm;
 		this.infoHash = infoHash;
@@ -52,18 +55,18 @@ public class FindPeersBehaviour extends TickerBehaviour {
 	 * elapsed time of the torrent registered for this
 	 * behaviour*/
 	public void setElapsedTime() {
-		double newTimeSeconds = System.currentTimeMillis()/1000 - startTimeSeconds;
-		double elapsedMinutes = newTimeSeconds/60; 
+		final double newTimeSeconds = System.currentTimeMillis()/1000.0 - startTimeSeconds;
+		final double elapsedMinutes = newTimeSeconds/60;
 		dm.addElapsedMinutes(elapsedMinutes, row);
 		startTimeSeconds = System.currentTimeMillis()/1000;
 	}
 		
-	@Override
 	/**The periodic action executed by the behaviour.
 	 * This method search for agents (peers) that has
 	 * the same torrent file (identified by the
 	 * piecesHex field - the pieces field into torrent file,
 	 * in hexadecimal format) to share.*/
+	@Override
 	public void onTick() {
 		if(dm.isCompleted(row)) {
 			this.stop();
@@ -72,7 +75,7 @@ public class FindPeersBehaviour extends TickerBehaviour {
 		setElapsedTime();
 		
 		/**List of obtained peers with has the torrent needed.*/
-		ArrayList<AID> peers = new ArrayList<AID>();
+		final var peers = new ArrayList<AID>();
 		
 		/*If the download is not complete and the number of peers
 		 * obtained is less than the number of peers wanted,

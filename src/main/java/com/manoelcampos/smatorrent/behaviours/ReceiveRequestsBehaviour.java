@@ -1,14 +1,16 @@
 package com.manoelcampos.smatorrent.behaviours;
 
+import com.manoelcampos.smatorrent.SharedFile;
+import com.manoelcampos.smatorrent.Torrent;
+import com.manoelcampos.smatorrent.TorrentClientAgent;
+import com.manoelcampos.smatorrent.XmlTorrentDataModel;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-
-import javax.swing.JOptionPane;
-
-import com.manoelcampos.smatorrent.*;
-
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.*;
 
 /**A cyclic behaviour that waits for requests
  * for pieces from others peers.
@@ -21,8 +23,7 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 	 * @param a The agent that will own this behaviour
 	 * @param dm The Data Model of the Xml file that
 	 * contains the torrents loaded in the application.*/
-	public ReceiveRequestsBehaviour(TorrentClientAgent a, 
-	  XmlTorrentDataModel dm) {
+	public ReceiveRequestsBehaviour(final TorrentClientAgent a, final XmlTorrentDataModel dm) {
 		super(a);
 		this.dm = dm;
 	}
@@ -32,16 +33,16 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 	 * informing to the requester, the pieces
 	 * that I have. This is informed by a bit field
 	 * message of the torrent protocol.*/
-	private void attendCPF(ACLMessage receivedMsg) {
+	private void attendCPF(final ACLMessage receivedMsg) {
 		System.out.println(myAgent.getLocalName() + 
 				": CPF (hadshake) received from " +
 				receivedMsg.getSender().getLocalName() +
 				". Msg = " + receivedMsg.getContent());
 
 		//handshake: <pstrlen><pstr><reserved><info_hash><peer_id>
-		String[] handshake = Torrent.splitMessage(receivedMsg.getContent());
-		int row = dm.findTorrent(handshake[3]);
-		ACLMessage reply = receivedMsg.createReply();
+		final String[] handshake = Torrent.splitMessage(receivedMsg.getContent());
+		final int row = dm.findTorrent(handshake[3]);
+		final var reply = receivedMsg.createReply();
 		reply.setReplyWith(handshake[3]);
 		if(row > -1) {
 			//bitfield msg: <len=0001+X><id=5><bitfield> 
@@ -80,39 +81,40 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 	 * @param receivedMsg The message received from a peer, with
 	 * accepting the proposal, indicating the requested piece, and that
 	 * will be used to send the reply.*/
-	private void sendPiece(ACLMessage receivedMsg) {
+	private void sendPiece(final ACLMessage receivedMsg) {
 		//TODO: Como o cliente que recebe a solicitação saberá
 		//de qual torrent é a parte solicitada, pois na msg
 		//request não há nenhuma informação sobre o torrent
 		
 		//request msg: <len=0013><id=6><index><begin><length>
-		String requestMsg = receivedMsg.getContent();
-		String splited[] = Torrent.splitMessage(requestMsg);
-		String begin=splited[3];
-		int pieceLength= Integer.parseInt(splited[4]);
-		int pieceNumber = Integer.parseInt(splited[2]);
+		final String requestMsg = receivedMsg.getContent();
+		final String split[] = Torrent.splitMessage(requestMsg);
+		String begin=split[3];
+		int pieceLength= Integer.parseInt(split[4]);
+		int pieceNumber = Integer.parseInt(split[2]);
 		
-		ACLMessage reply = receivedMsg.createReply();
-		String infoHash = receivedMsg.getReplyWith();
+		final ACLMessage reply = receivedMsg.createReply();
+		final String infoHash = receivedMsg.getReplyWith();
 		reply.setReplyWith(infoHash);
 		/* All messages received are marked with infoHash in the
 		 * replyTo ACL Message field to the 
 		 * peer identify, in all messages sent, the torrent
 		 * required*/
 		
-		int row = dm.findTorrent(infoHash);
+		final int row = dm.findTorrent(infoHash);
 		
 		if(row > -1) {
 			try {
 				String path = new File(".").getCanonicalPath();
 				path += File.separator + "bin" + File.separator;
-				String fileName = path+dm.getRow(row).getDescription();
-				File file = new File(fileName);
+				final String fileName = path+dm.getRow(row).getDescription();
+				final File file = new File(fileName);
 				if(!file.exists()) {
 					System.out.println(myAgent.getLocalName()+
 						": File not found '" + fileName + "'");
 					return;
 				}
+
 				final SharedFile sf = new SharedFile(fileName);
 				//X is the length of the block
 				//piece msg: <len=0009+X><id=7><index><begin><block>
@@ -174,7 +176,7 @@ public class ReceiveRequestsBehaviour extends CyclicBehaviour {
 		      MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL)
 		     );
 		
-		ACLMessage msg = myAgent.receive(template);
+		final ACLMessage msg = myAgent.receive(template);
 		if(msg != null) {
 			switch (msg.getPerformative()) {
 				case ACLMessage.CFP -> attendCPF(msg);

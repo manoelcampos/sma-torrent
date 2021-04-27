@@ -1,18 +1,18 @@
 package com.manoelcampos.smatorrent.behaviours;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import javax.swing.JOptionPane;
-
 import com.manoelcampos.smatorrent.*;
-
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**For each torrent shared for the client, must there be
  * a behaviour of this to request from the peers
@@ -22,7 +22,7 @@ import jade.lang.acl.UnreadableException;
  * @see FindPeersBehaviour*/
 public class RequestPiecesBehaviour extends SimpleBehaviour {
 	/**List of obtained peers with has the torrent needed.*/
-	private ArrayList<AID> peers = new ArrayList<AID>();
+	private List<AID> peers = new ArrayList<>();
 	private static final long serialVersionUID = -5926492582398379701L;
 	private String infoHash;
 	private int step = 0;
@@ -53,10 +53,11 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * @param dm The Data Model of the Xml file that
 	 * contains the torrents loaded in the application.*/
 	public RequestPiecesBehaviour(
-			FindPeersBehaviour fpb, 
-			Agent a, ArrayList<AID> peers,
-			String infoHash, String myBitField, long pieceLength,
-			XmlTorrentDataModel dm) {
+			final FindPeersBehaviour fpb,
+			final Agent a, final List<AID> peers,
+			final String infoHash, final String myBitField,
+			final long pieceLength, final XmlTorrentDataModel dm)
+	{
 		super(a);
 		this.peers = peers;
 		this.infoHash = infoHash;
@@ -89,9 +90,9 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * because if they don't exists 
 	 * @param newPeers The ArrayList of new peers to add to internal list.
 	 * */
-	public void addNewPeers(ArrayList<AID> newPeers) {
-		for(AID peer: newPeers) {
-			if(peers.indexOf(peer)==-1)
+	public void addNewPeers(final List<AID> newPeers) {
+		for(final AID peer: newPeers) {
+			if(!peers.contains(peer))
 				peers.add(peer);
 		}
 	}
@@ -107,7 +108,7 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	/**Receive a refuse message indicating that the remote
 	 * peer doesn't have the requested torrent to share.
 	 * @param receivedMsg The message received from a peer.*/
-	private void receiveRefuse(ACLMessage receivedMsg) {
+	private void receiveRefuse(final ACLMessage receivedMsg) {
 		requestResponsesCount++;
 		System.out.println(myAgent.getLocalName() + 
 				": Refuse received from " + 
@@ -120,18 +121,18 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * a proposal, indicating the pieces that it has, and that
 	 * will be used to send a reply.
 	 * @param pieceNumber The number of the piece to be requested.*/
-	private void requestPiece(ACLMessage receivedMsg, int pieceNumber) {
-		ACLMessage reply = receivedMsg.createReply();
+	private void requestPiece(final ACLMessage receivedMsg, int pieceNumber) {
+		final ACLMessage reply = receivedMsg.createReply();
 		
 		//request msg: <len=0013><id=6><index><begin><length>
-		long pieceBegin = Torrent.pieceBegin(pieceNumber, pieceLength);
+		final long pieceBegin = Torrent.pieceBegin(pieceNumber, pieceLength);
 		/*Based on the default piece length, get the length of
 		 * a specific piece.*/
-		int aPieceLength =
+		final int aPieceLength =
 			Torrent.getSpecificPieceLength(
 				dm.getRow(row).getFileSize(), pieceLength, pieceNumber);
 
-		String requestMsg = 
+		final String requestMsg =
 			"<len=0013><id=6><"+pieceNumber+"><"+pieceBegin+"><"+aPieceLength+">";
 		reply.setContent(requestMsg);
 		reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -147,7 +148,7 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * pieces that the peer has) or INFORM (with
 	 * a piece sended by a peer)*/
 	private void waitReplies() {
-		MessageTemplate template =
+		var template =
 			MessageTemplate.or(
 			  MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
 			  MessageTemplate.MatchPerformative(ACLMessage.INFORM));
@@ -164,13 +165,13 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 			MessageTemplate.or(
 					template, 
 					MessageTemplate.MatchInReplyTo(infoHash));
-		ACLMessage msg = myAgent.receive(template);
+		final ACLMessage msg = myAgent.receive(template);
 		//ACLMessage msg = myAgent.receive();
 		if(msg != null) {
-			switch(msg.getPerformative()) {
-				case ACLMessage.PROPOSE: receiveProposal(msg); break;
-				case ACLMessage.INFORM:  receivePiece(msg); break;
-				case ACLMessage.REFUSE:  receiveRefuse(msg); break;
+			switch (msg.getPerformative()) {
+				case ACLMessage.PROPOSE -> receiveProposal(msg);
+				case ACLMessage.INFORM -> receivePiece(msg);
+				case ACLMessage.REFUSE -> receiveRefuse(msg);
 			}
 		}
 		else {
@@ -194,33 +195,31 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * simplify the method used to extract the last field.
 	 * @return The first field extracted from the byte array
 	 * @see RequestPiecesBehaviour#deleteFirstFieldReceivedPieceMsg(byte[], boolean)*/
-	private byte[] getNextFieldReceivedPieceMsg(
-	 byte[] pieceMsg, boolean isTheLastField) {
+	private byte[] getNextFieldReceivedPieceMsg(final byte[] pieceMsg, final boolean isTheLastField) {
 		if(isTheLastField) {
 			byte[] field = new byte[pieceMsg.length-2];
 			System.arraycopy(pieceMsg, 1, field, 0, field.length);
 			return field;
 		}
-		else {
-			byte[] field = new byte[pieceMsg.length];
-			int i;
-			//start in position 1 (ignoring the char '<')
-			for(i = 1; i < pieceMsg.length; i++) {
-				//stop in the char '>'
-				if(pieceMsg[i]=='>')
-					break;
-				field[i-1]=pieceMsg[i];
-			}
-			
-			//create a variable with the size of the first field
-			//found in the pieceMsg, between < and >, but
-			//don't add this characters to the field
-			byte[] newField = new byte[i-1];
-			//copy to the field variable only the characteres before the '>' 
-			System.arraycopy(field, 0, newField, 0, newField.length);
-			
-			return newField;
+
+		final byte[] field = new byte[pieceMsg.length];
+		int i;
+		//start in position 1 (ignoring the char '<')
+		for(i = 1; i < pieceMsg.length; i++) {
+			//stop in the char '>'
+			if(pieceMsg[i]=='>')
+				break;
+			field[i-1]=pieceMsg[i];
 		}
+
+		//create a variable with the size of the first field
+		//found in the pieceMsg, between < and >, but
+		//don't add this characters to the field
+		final byte[] newField = new byte[i-1];
+		//copy to the field variable only the characteres before the '>'
+		System.arraycopy(field, 0, newField, 0, newField.length);
+
+		return newField;
 	}
 	
 	/**Delete the first field of the received byte array with
@@ -232,29 +231,27 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	 * simplify the method used to extract the last field.
 	 * @return The byte array without the extracted field
 	 * @see RequestPiecesBehaviour#getNextFieldReceivedPieceMsg(byte[], boolean)*/
-	private byte[] deleteFirstFieldReceivedPieceMsg(
-	 byte[] pieceMsg, boolean isTheLastField) {
+	private byte[] deleteFirstFieldReceivedPieceMsg(final byte[] pieceMsg, final boolean isTheLastField) {
 		if(isTheLastField) {
 			byte[] newPieceMsg = new byte[pieceMsg.length-2];
 			System.arraycopy(pieceMsg, 1, newPieceMsg, 0, newPieceMsg.length);
 			return newPieceMsg;
 		}
-		else {
-			int i=0;
-			while(pieceMsg[i]!='>')
-				i++;
-			//create a new variable do store the pieceMsg without
-			//the first field
-			byte[] newPieceMsg = new byte[pieceMsg.length - ++i];
-			System.arraycopy(pieceMsg, i, newPieceMsg, 0, newPieceMsg.length);
-			return newPieceMsg;
-		}
-	}	
+
+		int i=0;
+		while(pieceMsg[i]!='>')
+			i++;
+		//create a new variable do store the pieceMsg without
+		//the first field
+		final byte[] newPieceMsg = new byte[pieceMsg.length - ++i];
+		System.arraycopy(pieceMsg, i, newPieceMsg, 0, newPieceMsg.length);
+		return newPieceMsg;
+	}
 	
 	/**Receive a piece sended by a peer
 	 * @param receivedMsg The message received from a peer, with
 	 * a piece.*/
-	private void receivePiece(ACLMessage receivedMsg) {
+	private void receivePiece(final ACLMessage receivedMsg) {
 		int pieceNumber;
 		try {
 			//X is the length of the block
@@ -271,8 +268,8 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 			
 			getNextFieldReceivedPieceMsg(pieceMsg, false); //begin field
 			pieceMsg=deleteFirstFieldReceivedPieceMsg(pieceMsg, false);
-			
-			byte[] piece = getNextFieldReceivedPieceMsg(pieceMsg, true);
+
+			final byte[] piece = getNextFieldReceivedPieceMsg(pieceMsg, true);
 
 			String auxBitField = dm.getRow(row).getBitField();
 			auxBitField = Torrent.setBitFieldPosition(auxBitField, pieceNumber);
@@ -285,17 +282,13 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		    long fileLength = dm.getRow(row).getFileSize();
 		    int piecesCount = Torrent.numPieces(fileLength, pieceLength);
 		    sf.writePiece(pieceNumber, piecesCount, piece);
-		} catch(IOException e) {
-			JOptionPane.showMessageDialog(
-				    null, e.getLocalizedMessage(), 
-				    "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (UnreadableException e) {
+		} catch(IOException | UnreadableException e) {
 			JOptionPane.showMessageDialog(
 				    null, e.getLocalizedMessage(), 
 				    "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
 		System.out.println(myAgent.getLocalName() + 
 			": Piece " + pieceNumber + " received from " + 
 			receivedMsg.getSender().getLocalName());
@@ -303,15 +296,14 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	}
 	
 	/**Receive a proposal message.*/
-	private void receiveProposal(ACLMessage receivedMsg) {
+	private void receiveProposal(final ACLMessage receivedMsg) {
 		//bitfield msg: <len=0001+X><id=5><bitfield>
-		String bitFieldMsg = receivedMsg.getContent();
+		final String bitFieldMsg = receivedMsg.getContent();
 		System.out.println(myAgent.getLocalName() + 
 			": Proposal/bitfield msg received '" +
 			bitFieldMsg + "' from " + receivedMsg.getSender().getLocalName());
-		String peerBitField = Torrent.splitMessage(bitFieldMsg)[2];
-		int pieceNumber = 
-			Torrent.chooseRandomPiece(myBitField, peerBitField);
+		final String peerBitField = Torrent.splitMessage(bitFieldMsg)[2];
+		final int pieceNumber = Torrent.chooseRandomPiece(myBitField, peerBitField);
 		if(pieceNumber != -1) {
 			try {
 				myBitField =
@@ -329,8 +321,8 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		}
 	}
 	
-	@Override
 	/**Implements the action of the behaviuor.*/
+	@Override
 	public void action() {
 		fpb.setElapsedTime();
 		if(step==0) 
@@ -340,7 +332,7 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 	
 	public boolean done() {
 		//If step == -1, an error ocurred in the constructor
-		boolean isDone = (step==-1) || dm.isCompleted(row);
+		final boolean isDone = (step==-1) || dm.isCompleted(row);
 		if(isDone) {
 			System.out.println("Pieces received: " + requestResponsesCount);
 			try {
@@ -360,12 +352,12 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		if(peers.size()==0)
 			return;
 		
-		TorrentClientAgent a = (TorrentClientAgent)myAgent; 
+		final var a = (TorrentClientAgent)myAgent;
 		//handshake msg: <pstrlen><pstr><reserved><info_hash><peer_id>
-		ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-		String pstr = "BitTorrent protocol";
-		String reserved = "00000000";
-		StringBuffer  handshakeMsg = new StringBuffer(); 
+		final var msg = new ACLMessage(ACLMessage.CFP);
+		final String pstr = "BitTorrent protocol";
+		final String reserved = "00000000";
+		final var  handshakeMsg = new StringBuffer();
 		handshakeMsg.append("<"+pstr.length()+">");
 		handshakeMsg.append("<"+pstr+">");
 		handshakeMsg.append("<"+reserved+">");
@@ -377,12 +369,12 @@ public class RequestPiecesBehaviour extends SimpleBehaviour {
 		 * in the CPF/handshake message) and in the future
 		 * response messages*/
 		msg.setReplyWith(infoHash);
-		for(AID peer: peers) 
+		for(final AID peer: peers)
 		   msg.addReceiver(peer);
+
 		myAgent.send(msg);
 		step++;
 		System.out.println(myAgent.getLocalName() + 
 				": CPF/handshake msg sended '" + handshakeMsg + "'");
 	}
-
 }
