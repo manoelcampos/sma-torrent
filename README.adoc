@@ -20,7 +20,7 @@ image:imgs/sma-torrent-gui.png[]
 
 == Disclaimer
 
-The project can be useful just as a concept proof of Multi-Agent Systems (MAS), once the architecture of MAS using the JADE framework imposes a centralized server to allow the communication between the clients (agents/peers). 
+The project can be useful just as a proof of concept of Multi-Agent Systems (MAS), once the architecture of MAS using the JADE framework imposes a centralized server to allow the communication between the clients (agents/peers). 
 
 Several BitTorrent systems have evolved to a decentralized management architecture that provides more independency, security, scalability and fault-tolerance. This way, the current project doesn't intend to be a viable BitTorrent client, but only a case study of MAS and JADE framework use.
 
